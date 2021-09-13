@@ -1,6 +1,10 @@
+import collections
 import functools
 import itertools
-from typing import Callable, Iterable, Mapping, TypeVar
+import more_itertools
+from typing import Callable, Iterable, Mapping, Tuple, TypeVar
+
+from darwin import util
 
 
 A = TypeVar
@@ -45,3 +49,55 @@ def groupby(func: Callable[[A], B]) -> Callable[[Iterable[A]], Mapping[B, Iterab
   def __fn(iterable: Iterable[A]) -> Mapping[B, Iterable[A]]:
     return itertools.groupby(iterable, key=func)
   return __fn
+
+
+def chunk(size: int) -> Callable[[Iterable[A]], Iterable[Tuple]]:
+  def __fn(iterable: Iterable[A]) -> Iterable[Tuple]:
+    return more_itertools.chunked(iterable, size, strict=False)
+  return __fn
+
+
+def partition(func: Callable[[A], bool]) -> Callable[[Iterable[A]], Tuple[Iterable[A], Iterable[A]]]:
+  def __fn(iterable: Iterable[A]) -> Tuple[Iterable[A], Iterable[A]]:
+    return more_itertools.partition(func, iterable)
+  return __fn
+
+
+def compact(iterable: Iterable[A]) -> Iterable[A]:
+  return filter(bool)(iterable)
+
+
+def take(size: int) -> Callable[[Iterable[A]], Iterable[A]]:
+  def __fn(iterable: Iterable[A]) -> Iterable[A]:
+    return more_itertools.take(size, iterable)
+  return __fn
+
+
+def tap(func: Callable[[A], None]) -> Callable[[Iterable[A]], Iterable[A]]:
+  def __fn(iterable: Iterable[A]) -> Iterable[A]:
+    for element in iterable:
+      func(element)
+      yield element
+  return __fn
+
+
+def countby(func: Callable[[A], B]) -> Callable[[Iterable[A]], collections.Counter]:
+  return util.compose(collections.Counter, map(func))
+
+
+def flatten(iterable: Iterable[Iterable[A]]) -> Iterable[A]:
+  return more_itertools.flatten(iterable)
+
+
+def flatmap(func: Callable[[A], Iterable[A]]) -> Callable[[Iterable[A]], Iterable[A]]:
+  return util.compose(flatten, map(func))
+
+
+def sortby(func: Callable[[A], B]) -> Callable[[Iterable[A]], Iterable[A]]:
+  def __fn(iterable: Iterable[A]) -> Iterable[A]:
+    return sorted(iterable, key=func)
+  return __fn
+
+
+def sumby(func: Callable[[A], float]) -> Callable[[Iterable], float]:
+  return util.compose(sum, map(func))
