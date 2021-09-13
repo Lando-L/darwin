@@ -29,9 +29,9 @@ def curried(func: Callable) -> Callable:
 
 
 def tupled(func: Callable):
-    def tupled_func(tupled: Tuple):
-        return func(*tupled)
-    return tupled_func
+  def tupled_func(tupled: Tuple):
+    return func(*tupled)
+  return tupled_func
 
 
 def identity(a: A) -> A:
@@ -46,7 +46,7 @@ def constant(b: B) -> Callable[[A], B]:
 
 def compose(*funcs):
   def __fn(f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
-    def __gn(a: A) -> B:
+    def __gn(a: A) -> C:
       return f(g(a))
     return __gn
 
